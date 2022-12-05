@@ -14,7 +14,7 @@ func SaveScore(ctx *fiber.Ctx) error {
 	score := new(model.Score)
 	err := ctx.BodyParser(score)
 	if err != nil {
-		log.Fatalln(err)
+		log.Println(err)
 		return ctx.SendStatus(500)
 	}
 
@@ -34,7 +34,7 @@ func SaveScore(ctx *fiber.Ctx) error {
 
 	insert, err := database.InsertBoardData(score)
 	if err != nil {
-		log.Fatalln(err)
+		log.Println(err)
 		return ctx.SendStatus(500)
 	}
 
@@ -60,7 +60,7 @@ func GetScore(ctx *fiber.Ctx) error {
 
 	scores, err := database.SelectBoardData(gameTitle, gameType, count)
 	if err != nil {
-		log.Fatalln(err)
+		log.Println(err)
 		return ctx.SendStatus(500)
 	}
 

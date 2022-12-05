@@ -25,7 +25,7 @@ func getPort() string {
 func main() {
 	err := godotenv.Load(".env")
 	if err != nil {
-		log.Fatalln("error loading .env file")
+		log.Println("error loading .env file")
 	}
 
 	database.Initialize()
