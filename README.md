@@ -1,19 +1,7 @@
-# Sample Go
+# Leader Board Server
 
-Run Locally with Go installed:
-```
-go build
-./sample-go
-```
+## Uses
 
-Run Locally with pack & Docker:
-```
-pack build --builder=gcr.io/buildpacks/builder sample-go
-docker run -p8080:8080 sample-go
-```
-
-Check it out: [http://localhost:8080](http://localhost:8080)
-
-Run on Cloud Run:
-
-[![Run on Google Cloud](https://deploy.cloud.run/button.svg)](https://deploy.cloud.run)
+- golang (dev: 1.19, publish: 1.17)
+- fiber
+- mariadb (10.5)
