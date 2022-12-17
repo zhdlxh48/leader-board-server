@@ -35,5 +35,8 @@ func main() {
 	app.Get("/", routes.GetScore)
 	app.Post("/", routes.SaveScore)
 
+	app.Get("/rank", routes.GetRanks)
+	app.Get("/rank/:user", routes.GetUserRank)
+
 	app.Listen(getPort())
 }

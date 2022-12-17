@@ -67,6 +67,30 @@ func SelectBoardData(gameTitle string, gameType string, count int) (*[]model.Gor
 	return scores, nil
 }
 
+func SelectRanks(gameTitle string, gameType string, count int) (*[]model.Rank, error) {
+	ranks := new([]model.Rank)
+	tx := DBConn.Raw("SELECT user_name, user_score, RANK() OVER (ORDER BY user_score DESC) as ranking FROM test_leader_board WHERE game_title = ? AND game_type = ? LIMIT ?", gameTitle, gameType, count).Scan(ranks)
+	log.Println(ranks)
+	err := tx.Error
+	if err != nil {
+		return nil, err
+	}
+
+	return ranks, nil
+}
+
+func SelectUserRank(gameTitle string, gameType string, userName string) (*model.Rank, error) {
+	rank := new(model.Rank)
+	tx := DBConn.Raw("SELECT user_name, user_score, ranking FROM (SELECT user_name, user_score, RANK() OVER (ORDER BY user_score DESC) as ranking FROM test_leader_board WHERE game_title = ? AND game_type = ?) as CNT WHERE user_name = ? LIMIT 1", gameTitle, gameType, userName).Scan(rank)
+	log.Println(rank)
+	err := tx.Error
+	if err != nil {
+		return nil, err
+	}
+
+	return rank, nil
+}
+
 func DatabaseVersion() string {
 	ver := new(string)
 	DBConn.Raw("SELECT VERSION()").Scan(ver)

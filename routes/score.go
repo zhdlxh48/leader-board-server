@@ -11,30 +11,39 @@ import (
 )
 
 func SaveScore(ctx *fiber.Ctx) error {
-	score := new(model.Score)
-	err := ctx.BodyParser(score)
-	if err != nil {
-		log.Println(err)
+	payload := struct {
+		GameTitle string `json:"game_title"`
+		GameType  string `json:"game_type"`
+		UserID    string `json:"user_id"`
+		UserName  string `json:"user_name"`
+		UserScore int64  `json:"user_score"`
+	}{}
+	if err := ctx.BodyParser(&payload); err != nil {
+		log.Println(payload)
+		log.Println("Body Parser:", err)
 		return ctx.SendStatus(500)
 	}
 
-	if score.GameTitle == "" || score.GameType == "" {
+	log.Println(payload)
+
+	if payload.GameTitle == "" || payload.GameType == "" {
 		ctx.SendStatus(400)
 		return ctx.JSON(fiber.Map{
 			"message": "please insert title and type on request",
 		})
 	}
 
-	if score.UserID == "" {
-		score.UserID = "anonymous"
+	if payload.UserID == "" {
+		payload.UserID = "anonymous"
 	}
-	if score.UserName == "" {
-		score.UserName = "익명"
+	if payload.UserName == "" {
+		payload.UserName = "익명"
 	}
 
-	insert, err := database.InsertBoardData(score)
+	data := &model.Score{GameTitle: payload.GameTitle, GameType: payload.GameType, UserID: payload.UserID, UserName: payload.UserName, UserScore: payload.UserScore}
+	insert, err := database.InsertBoardData(data)
 	if err != nil {
-		log.Println(err)
+		log.Println("Database Error:", err)
 		return ctx.SendStatus(500)
 	}
 
@@ -60,11 +69,60 @@ func GetScore(ctx *fiber.Ctx) error {
 
 	scores, err := database.SelectBoardData(gameTitle, gameType, count)
 	if err != nil {
-		log.Println(err)
+		log.Println("Database Error:", err)
 		return ctx.SendStatus(500)
 	}
 
 	return ctx.JSON(fiber.Map{
 		"scores": *scores,
+	})
+}
+
+func GetRanks(ctx *fiber.Ctx) error {
+	gameTitle := ctx.Query("title")
+	gameType := ctx.Query("type")
+	count, err := strconv.Atoi(ctx.Query("count"))
+	if err != nil {
+		count = 10
+	}
+
+	if gameTitle == "" || gameType == "" {
+		ctx.SendStatus(400)
+		return ctx.JSON(fiber.Map{
+			"message": "please insert title and type on request",
+		})
+	}
+
+	ranks, err := database.SelectRanks(gameTitle, gameType, count)
+	if err != nil {
+		log.Println("Database Error:", err)
+		return ctx.SendStatus(500)
+	}
+
+	return ctx.JSON(fiber.Map{
+		"ranks": *ranks,
+	})
+}
+
+func GetUserRank(ctx *fiber.Ctx) error {
+	gameTitle := ctx.Query("title")
+	gameType := ctx.Query("type")
+	userName := ctx.Params("user")
+
+	if gameTitle == "" || gameType == "" || userName == "" {
+		ctx.SendStatus(400)
+		return ctx.JSON(fiber.Map{
+			"message": "please insert title, type and user on request",
+		})
+	}
+
+	rank, err := database.SelectUserRank(gameTitle, gameType, userName)
+	if err != nil {
+		log.Println("Database Error:", err)
+		return ctx.SendStatus(500)
+	}
+
+	return ctx.JSON(fiber.Map{
+		"rank": *rank,
 	})
 }
